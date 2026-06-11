@@ -1,4 +1,4 @@
-# Hutao Rewrite 精简版配置（由 Rewrite.yml 自动生成）
+﻿# Hutao Rewrite 精简版配置（由 Rewrite.yml 自动生成）
 # 本文件由 Rewrite.yml workflow 自动从 hutao-lite.yaml 转换生成
 # 手动修改可能被覆盖
 
@@ -130,4 +130,4 @@ rule-anchor:
   domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
 
 rule-providers:
-  fakeip_filter_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/fakeip-filter.mrs" }
+  fakeip_filter_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/fakeip-filter-domain.mrs" }

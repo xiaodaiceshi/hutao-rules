@@ -3,14 +3,42 @@ name: 部署规则集
 on:
   push:
     branches: [main]
+    paths:
+      - 'hutao-*.yaml'
+      - 'hutao-*.ini'
+      - 'hutao-*.list'
+      - 'src/rules/**'
+      - 'src/rewrite/**'
   workflow_dispatch:
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 验证 Yaml
+
+      - name: 验证 YAML 配置文件
         run: |
-          # 在此添加 yaml 验证命令
-          echo "待实现"
+          files=("hutao-full.yaml" "hutao-full-noad.yaml" "hutao-lite.yaml" "hutao-beta.yaml")
+          for f in "${files[@]}"; do
+            if [ -f "$f" ]; then
+              echo "✅ 验证 $f"
+              python3 -c "import yaml; yaml.safe_load(open('$f')); print('  → 语法正确')"
+            else
+              echo "⚠️  跳过 $f (文件不存在)"
+            fi
+          done
+
+      - name: 验证规则列表文件
+        run: |
+          lists=("src/rules/domain/hutao_domain.list"
+                 "src/rules/game/hutao_game.list"
+                 "src/rules/ip/hutao_ip.list"
+                 "src/rewrite/hutao.yaml")
+          for f in "${lists[@]}"; do
+            if [ -f "$f" ]; then
+              echo "✅ 存在 $f"
+            else
+              echo "⚠️  缺少 $f"
+            fi
+          done

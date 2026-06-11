@@ -1,4 +1,4 @@
-name: 部署规则集
+name: 验证并部署规则集
 
 on:
   push:
@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: 安装依赖
+        run: pip install pyyaml
+
       - name: 验证 YAML 配置文件
         run: |
           files=("hutao-full.yaml" "hutao-full-noad.yaml" "hutao-lite.yaml" "hutao-beta.yaml")
@@ -31,14 +34,8 @@ jobs:
 
       - name: 验证规则列表文件
         run: |
-          lists=("src/rules/domain/hutao_domain.list"
-                 "src/rules/game/hutao_game.list"
-                 "src/rules/ip/hutao_ip.list"
-                 "src/rewrite/hutao.yaml")
-          for f in "${lists[@]}"; do
-            if [ -f "$f" ]; then
-              echo "✅ 存在 $f"
-            else
-              echo "⚠️  缺少 $f"
-            fi
-          done
+          echo "=== 规则文件检查 ==="
+          find src/rules -type f | sort
+          echo ""
+          echo "=== Rewrite 文件检查 ==="
+          find src/rewrite -type f | sort

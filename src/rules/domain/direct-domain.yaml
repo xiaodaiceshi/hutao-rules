@@ -1,0 +1,5 @@
+payload:
+ - 'direct.example.com'
+ - '*.local'
+ - '*.lan'
+ - '*.internal'

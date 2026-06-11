@@ -1,0 +1,9 @@
+payload:
+ - '*.netflix.com'
+ - '*.netflix.net'
+ - '*.disneyplus.com'
+ - '*.hbomax.com'
+ - '*.primevideo.com'
+ - '*.bbc.co.uk'
+ - '*.channel4.com'
+ - '*.itv.com'

@@ -1,0 +1,6 @@
+payload:
+ - '*.googleapis.com'
+ - '*.gstatic.com'
+ - '*.google.com'
+ - '*.google.cn'
+ - '*.googlevideo.com'

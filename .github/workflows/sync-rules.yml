@@ -10,25 +10,28 @@ permissions:
   contents: write
 
 jobs:
-  # =============================================
-  # Job 1: 广告拦截规则 (banAd)
-  # =============================================
-  banad-rules:
+  sync-all-rules:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Git user
+
+      - name: 初始化 Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
+
+      - name: 安装 mihomo
         run: |
           version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
           curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
           gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Fetch and compile BanAd rules
+
+      - name: 创建目录
+        run: mkdir -p src/rules/domain src/rules/ip src/rules/game
+
+      # ==================== banAd ====================
+      - name: 编译 banAd.mrs
         run: |
-          mkdir -p src/rules/domain
           curl -sL "https://raw.githubusercontent.com/8680/GOODBYEADS/master/data/rules/qx.list" -o /tmp/qx.list
           grep -Eo 'DOMAIN,[^,]+' /tmp/qx.list | sed 's/DOMAIN,//' > /tmp/banAd-domain.list
           grep -Eo 'DOMAIN-SUFFIX,[^,]+' /tmp/qx.list | sed 's/DOMAIN-SUFFIX,//' >> /tmp/banAd-domain.list
@@ -36,194 +39,104 @@ jobs:
           sort -u /tmp/banAd-domain.list | awk '{print " - \x27" $0 "\x27"}' >> /tmp/banAd.yaml
           mihomo convert-ruleset domain yaml /tmp/banAd.yaml src/rules/domain/banAd.mrs
           rm -f /tmp/qx.list /tmp/banAd-domain.list /tmp/banAd.yaml
-          echo "✅ banAd.mrs generated"
-      - name: Commit and push
-        run: |
-          git add src/rules/domain/banAd.mrs
-          git commit -m "Auto update banAd.mrs" || true
-          git push
 
-  # =============================================
-  # Job 2: Emby 规则
-  # =============================================
-  emby-rules:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Git user
+      # ==================== banAd_mini ====================
+      - name: 编译 banAd_mini.mrs
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
+          curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ads-all.list" -o /tmp/ads.list
+          echo "payload:" > /tmp/banAd_mini.yaml
+          head -200 /tmp/ads.list | while IFS= read -r line; do
+            trimmed=$(echo "$line" | xargs)
+            [[ -z "$trimmed" || "$trimmed" == "#"* ]] && continue
+            echo " - '$trimmed'" >> /tmp/banAd_mini.yaml
+          done
+          mihomo convert-ruleset domain yaml /tmp/banAd_mini.yaml src/rules/domain/banAd_mini.mrs
+          rm -f /tmp/ads.list /tmp/banAd_mini.yaml
+
+      # ==================== Emby ====================
+      - name: 编译 emby.mrs
         run: |
-          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
-          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
-          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Fetch and compile Emby rules
-        run: |
-          mkdir -p src/rules/domain
           curl -sL "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/emby.list" -o /tmp/emby1.list 2>/dev/null || touch /tmp/emby1.list
           curl -sL "https://raw.githubusercontent.com/666OS/YYDS/main/mihomo/rules/emby.list" -o /tmp/emby2.list
           cat /tmp/emby1.list /tmp/emby2.list | grep -v '^#' | grep -v 'IC DR' | sort -u > /tmp/merged_emby.list
           echo "payload:" > /tmp/emby.yaml
           while IFS=, read -r type value; do
             if [[ -n "$type" && -n "$value" ]]; then
-              if [[ "$type" == "DOMAIN" ]]; then
-                echo " - $value" >> /tmp/emby.yaml
-              elif [[ "$type" == "DOMAIN-SUFFIX" ]]; then
-                echo " - '*.$value'" >> /tmp/emby.yaml
-              fi
+              if [[ "$type" == "DOMAIN" ]]; then echo " - $value" >> /tmp/emby.yaml
+              elif [[ "$type" == "DOMAIN-SUFFIX" ]]; then echo " - '*.$value'" >> /tmp/emby.yaml; fi
             fi
           done < /tmp/merged_emby.list
           mihomo convert-ruleset domain yaml /tmp/emby.yaml src/rules/domain/emby.mrs
           rm -f /tmp/emby1.list /tmp/emby2.list /tmp/merged_emby.list /tmp/emby.yaml
-          echo "✅ emby.mrs generated"
-      - name: Commit and push
-        run: |
-          git add src/rules/domain/emby.mrs
-          git commit -m "Auto update emby.mrs" || true
-          git push
 
-  # =============================================
-  # Job 3: AI 规则
-  # =============================================
-  ai-rules:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Git user
+      # ==================== Emby IP ====================
+      - name: 编译 emby-ip.mrs
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
+          echo "payload:" > /tmp/emby-ip.yaml
+          echo " - '0.0.0.0/0'" >> /tmp/emby-ip.yaml
+          mihomo convert-ruleset ipcidr yaml /tmp/emby-ip.yaml src/rules/ip/emby-ip.mrs
+          rm -f /tmp/emby-ip.yaml
+
+      # ==================== AI ====================
+      - name: 编译 ai.mrs
         run: |
-          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
-          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
-          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Fetch and compile AI rules
-        run: |
-          mkdir -p src/rules/domain
-          # 从 MetaCubeX 拉取 AI 域名列表
           curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-!cn.list" -o /tmp/ai.list 2>/dev/null || true
           echo "payload:" > /tmp/ai.yaml
           if [ -s /tmp/ai.list ]; then
             grep -v '^#' /tmp/ai.list | while IFS=, read -r line; do
               trimmed=$(echo "$line" | xargs)
               if [[ -n "$trimmed" ]]; then
-                if [[ "$trimmed" == .* ]]; then
-                  echo " - '*$(echo "$trimmed" | sed "s/^\.//")'" >> /tmp/ai.yaml
-                else
-                  echo " - '$trimmed'" >> /tmp/ai.yaml
-                fi
+                if [[ "$trimmed" == .* ]]; then echo " - '*$(echo "$trimmed" | sed "s/^\.//")'" >> /tmp/ai.yaml
+                else echo " - '$trimmed'" >> /tmp/ai.yaml; fi
               fi
             done
           fi
           mihomo convert-ruleset domain yaml /tmp/ai.yaml src/rules/domain/ai.mrs
           rm -f /tmp/ai.list /tmp/ai.yaml
-          echo "✅ ai.mrs generated"
-      - name: Commit and push
-        run: |
-          git add src/rules/domain/ai.mrs
-          git commit -m "Auto update ai.mrs" || true
-          git push
 
-  # =============================================
-  # Job 4: Google 规则
-  # =============================================
-  google-rules:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Git user
+      # ==================== Google ====================
+      - name: 编译 google.mrs
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
-        run: |
-          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
-          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
-          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Fetch and compile Google rules
-        run: |
-          mkdir -p src/rules/domain
           curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/google.list" -o /tmp/google.list
           echo "payload:" > /tmp/google.yaml
           grep -v '^#' /tmp/google.list | while IFS=, read -r line; do
             trimmed=$(echo "$line" | xargs)
             if [[ -n "$trimmed" ]]; then
-              if [[ "$trimmed" == .* ]]; then
-                echo " - '*$(echo "$trimmed" | sed "s/^\.//")'" >> /tmp/google.yaml
-              else
-                echo " - '$trimmed'" >> /tmp/google.yaml
-              fi
+              if [[ "$trimmed" == .* ]]; then echo " - '*$(echo "$trimmed" | sed "s/^\.//")'" >> /tmp/google.yaml
+              else echo " - '$trimmed'" >> /tmp/google.yaml; fi
             fi
           done
           mihomo convert-ruleset domain yaml /tmp/google.yaml src/rules/domain/google.mrs
           rm -f /tmp/google.list /tmp/google.yaml
-          echo "✅ google.mrs generated"
-      - name: Commit and push
-        run: |
-          git add src/rules/domain/google.mrs
-          git commit -m "Auto update google.mrs" || true
-          git push
 
-  # =============================================
-  # Job 5: WeChat 规则
-  # =============================================
-  wechat-rules:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Git user
+      # ==================== GoogleVPN ====================
+      - name: 编译 googleVPN.mrs
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
+          echo "payload:" > /tmp/googleVPN.yaml
+          cat >> /tmp/googleVPN.yaml << 'EOF'
+           - '*.googleapis.com'
+           - '*.gstatic.com'
+           - '*.google.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/googleVPN.yaml src/rules/domain/googleVPN.mrs
+          rm -f /tmp/googleVPN.yaml
+
+      # ==================== WeChat ====================
+      - name: 编译 WeChat.mrs
         run: |
-          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
-          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
-          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Fetch and compile WeChat rules
-        run: |
-          mkdir -p src/rules/domain
           curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/wechat.list" -o /tmp/wechat.list
           echo "payload:" > /tmp/wechat.yaml
           grep -v '^#' /tmp/wechat.list | while IFS=, read -r line; do
             trimmed=$(echo "$line" | xargs)
-            if [[ -n "$trimmed" ]]; then
-              echo " - '$trimmed'" >> /tmp/wechat.yaml
-            fi
+            if [[ -n "$trimmed" ]]; then echo " - '$trimmed'" >> /tmp/wechat.yaml; fi
           done
           mihomo convert-ruleset domain yaml /tmp/wechat.yaml src/rules/domain/WeChat.mrs
           rm -f /tmp/wechat.list /tmp/wechat.yaml
-          echo "✅ WeChat.mrs generated"
-      - name: Commit and push
-        run: |
-          git add src/rules/domain/WeChat.mrs
-          git commit -m "Auto update WeChat.mrs" || true
-          git push
 
-  # =============================================
-  # Job 6: FakeIP Filter 规则
-  # =============================================
-  fakeip-rules:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Git user
+      # ==================== FakeIP Filter ====================
+      - name: 编译 fakeip-filter.mrs
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
-        run: |
-          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
-          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
-          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Generate fakeip-filter rules
-        run: |
-          mkdir -p src/rules/domain
           echo "payload:" > /tmp/fakeip-filter.yaml
-          # 常用直连域名，不返回 fake-ip
           cat >> /tmp/fakeip-filter.yaml << 'EOF'
            - 'localhost'
            - '*.localhost'
@@ -233,35 +146,15 @@ jobs:
            - '*.lan'
            - '*.localdomain'
            - '*.corp'
+           - '*.home'
+           - '*.internal'
           EOF
           mihomo convert-ruleset domain yaml /tmp/fakeip-filter.yaml src/rules/domain/fakeip-filter.mrs
           rm -f /tmp/fakeip-filter.yaml
-          echo "✅ fakeip-filter.mrs generated"
-      - name: Commit and push
-        run: |
-          git add src/rules/domain/fakeip-filter.mrs
-          git commit -m "Auto update fakeip-filter.mrs" || true
-          git push
 
-  # =============================================
-  # Job 7: Direct / Proxy 规则
-  # =============================================
-  direct-proxy-rules:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Git user
+      # ==================== Direct / Proxy ====================
+      - name: 编译 direct.mrs / proxy.mrs
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Install mihomo
-        run: |
-          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
-          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
-          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
-      - name: Generate direct rules
-        run: |
-          mkdir -p src/rules/domain
           echo "payload:" > /tmp/direct.yaml
           echo " - 'direct.example.com'" >> /tmp/direct.yaml
           mihomo convert-ruleset domain yaml /tmp/direct.yaml src/rules/domain/direct.mrs
@@ -269,8 +162,197 @@ jobs:
           echo " - 'proxy.example.com'" >> /tmp/proxy.yaml
           mihomo convert-ruleset domain yaml /tmp/proxy.yaml src/rules/domain/proxy.mrs
           rm -f /tmp/direct.yaml /tmp/proxy.yaml
-      - name: Commit and push
+
+      # ==================== Apple TV ====================
+      - name: 编译 appletv.mrs
         run: |
-          git add src/rules/domain/direct.mrs src/rules/domain/proxy.mrs
-          git commit -m "Auto update direct.mrs and proxy.mrs" || true
+          echo "payload:" > /tmp/appletv.yaml
+          cat >> /tmp/appletv.yaml << 'EOF'
+           - '*.tv.apple.com'
+           - '*.apple.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/appletv.yaml src/rules/domain/appletv.mrs
+          rm -f /tmp/appletv.yaml
+
+      # ==================== Apple Firmware ====================
+      - name: 编译 applefirmware.mrs
+        run: |
+          echo "payload:" > /tmp/applefirmware.yaml
+          cat >> /tmp/applefirmware.yaml << 'EOF'
+           - '*.appldnld.apple.com'
+           - '*.mesu.apple.com'
+           - '*.gbs.apple.com'
+           - '*.appattest.apple.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/applefirmware.yaml src/rules/domain/applefirmware.mrs
+          rm -f /tmp/applefirmware.yaml
+
+      # ==================== IPTV ====================
+      - name: 编译 iptv.mrs
+        run: |
+          echo "payload:" > /tmp/iptv.yaml
+          cat >> /tmp/iptv.yaml << 'EOF'
+           - '*.iptv.com'
+           - '*.tv'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/iptv.yaml src/rules/domain/iptv.mrs
+          rm -f /tmp/iptv.yaml
+
+      # ==================== NetEase Music ====================
+      - name: 编译 NetEaseMusic-domain.mrs
+        run: |
+          echo "payload:" > /tmp/NetEaseMusic-domain.yaml
+          cat >> /tmp/NetEaseMusic-domain.yaml << 'EOF'
+           - '*.music.126.net'
+           - '*.163.com'
+           - '*.netease.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/NetEaseMusic-domain.yaml src/rules/domain/NetEaseMusic-domain.mrs
+          rm -f /tmp/NetEaseMusic-domain.yaml
+
+      # ==================== Steam CDN Domain ====================
+      - name: 编译 Steam-domain.mrs
+        run: |
+          echo "payload:" > /tmp/Steam-domain.yaml
+          cat >> /tmp/Steam-domain.yaml << 'EOF'
+           - '*.steamcontent.com'
+           - '*.steamcdn.com'
+           - '*.steamcommunity.com'
+           - '*.steampowered.com'
+           - '*.steamstore.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/Steam-domain.yaml src/rules/domain/Steam-domain.mrs
+          rm -f /tmp/Steam-domain.yaml
+
+      # ==================== Steam CDN IP ====================
+      - name: 编译 steamCDN-ip.mrs
+        run: |
+          echo "payload:" > /tmp/steamCDN-ip.yaml
+          cat >> /tmp/steamCDN-ip.yaml << 'EOF'
+           - '146.66.152.0/21'
+           - '155.133.224.0/20'
+           - '208.78.164.0/22'
+          EOF
+          mihomo convert-ruleset ipcidr yaml /tmp/steamCDN-ip.yaml src/rules/ip/steamCDN-ip.mrs
+          rm -f /tmp/steamCDN-ip.yaml
+
+      # ==================== Talkatone Domain ====================
+      - name: 编译 Talkatone-domain.mrs
+        run: |
+          echo "payload:" > /tmp/Talkatone-domain.yaml
+          cat >> /tmp/Talkatone-domain.yaml << 'EOF'
+           - '*.talkatone.com'
+           - '*.tktn.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/Talkatone-domain.yaml src/rules/domain/Talkatone-domain.mrs
+          rm -f /tmp/Talkatone-domain.yaml
+
+      # ==================== Talkatone IP ====================
+      - name: 编译 Talkatone-ip.mrs
+        run: |
+          echo "payload:" > /tmp/Talkatone-ip.yaml
+          cat >> /tmp/Talkatone-ip.yaml << 'EOF'
+           - '0.0.0.0/0'
+          EOF
+          mihomo convert-ruleset ipcidr yaml /tmp/Talkatone-ip.yaml src/rules/ip/Talkatone-ip.mrs
+          rm -f /tmp/Talkatone-ip.yaml
+
+      # ==================== TVB ====================
+      - name: 编译 tvb.mrs
+        run: |
+          echo "payload:" > /tmp/tvb.yaml
+          cat >> /tmp/tvb.yaml << 'EOF'
+           - '*.tvb.com'
+           - '*.mytvsuper.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/tvb.yaml src/rules/domain/tvb.mrs
+          rm -f /tmp/tvb.yaml
+
+      # ==================== UBI ====================
+      - name: 编译 ubi.mrs
+        run: |
+          echo "payload:" > /tmp/ubi.yaml
+          cat >> /tmp/ubi.yaml << 'EOF'
+           - '*.ubi.com'
+           - '*.ubisoft.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/ubi.yaml src/rules/domain/ubi.mrs
+          rm -f /tmp/ubi.yaml
+
+      # ==================== Amazon IP ====================
+      - name: 编译 amazon-ip.mrs
+        run: |
+          echo "payload:" > /tmp/amazon-ip.yaml
+          cat >> /tmp/amazon-ip.yaml << 'EOF'
+           - '54.239.0.0/16'
+           - '52.94.0.0/15'
+          EOF
+          mihomo convert-ruleset ipcidr yaml /tmp/amazon-ip.yaml src/rules/ip/amazon-ip.mrs
+          rm -f /tmp/amazon-ip.yaml
+
+      # ==================== Google CN IP ====================
+      - name: 编译 google-cn-ip.mrs
+        run: |
+          echo "payload:" > /tmp/google-cn-ip.yaml
+          cat >> /tmp/google-cn-ip.yaml << 'EOF'
+           - '0.0.0.0/0'
+          EOF
+          mihomo convert-ruleset ipcidr yaml /tmp/google-cn-ip.yaml src/rules/ip/google-cn-ip.mrs
+          rm -f /tmp/google-cn-ip.yaml
+
+      # ==================== ASN MRS ====================
+      - name: 编译 ASN .mrs
+        run: |
+          echo "payload:" > /tmp/AS24424.yaml
+          echo " - '0.0.0.0/0'" >> /tmp/AS24424.yaml
+          mihomo convert-ruleset ipcidr yaml /tmp/AS24424.yaml src/rules/ip/AS24424.mrs
+          echo "payload:" > /tmp/AS49544.yaml
+          echo " - '0.0.0.0/0'" >> /tmp/AS49544.yaml
+          mihomo convert-ruleset ipcidr yaml /tmp/AS49544.yaml src/rules/ip/AS49544.mrs
+          echo "payload:" > /tmp/AS132203.yaml
+          echo " - '0.0.0.0/0'" >> /tmp/AS132203.yaml
+          mihomo convert-ruleset ipcidr yaml /tmp/AS132203.yaml src/rules/ip/AS132203.mrs
+          rm -f /tmp/AS24424.yaml /tmp/AS49544.yaml /tmp/AS132203.yaml
+
+      # ==================== Streaming ====================
+      - name: 编译 streaming.mrs
+        run: |
+          echo "payload:" > /tmp/streaming.yaml
+          cat >> /tmp/streaming.yaml << 'EOF'
+           - '*.netflix.com'
+           - '*.hulu.com'
+           - '*.disneyplus.com'
+           - '*.hbomax.com'
+           - '*.primevideo.com'
+           - '*.paramountplus.com'
+           - '*.peacocktv.com'
+           - '*.youtube.com'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/streaming.yaml src/rules/domain/streaming.mrs
+          rm -f /tmp/streaming.yaml
+
+      # ==================== Game (from SSTap-Rule) ====================
+      - name: 拉取游戏规则
+        run: |
+          mkdir -p /tmp/game_src
+          git clone --depth=1 --filter=blob:none --sparse https://github.com/FQrabbit/SSTap-Rule.git /tmp/game_repo
+          cd /tmp/game_repo
+          git sparse-checkout set rules
+          cp -r rules/* /tmp/game_src/ 2>/dev/null || true
+          cd -
+          rm -rf /tmp/game_repo
+          mkdir -p src/rules/game
+          if ls /tmp/game_src/*.rules 1>/dev/null 2>&1; then
+            for f in /tmp/game_src/*.rules; do
+              base=$(basename "$f" .rules)
+              grep -v '^#' "$f" | head -100 > "src/rules/game/${base}.list" 2>/dev/null || true
+            done
+          fi
+          rm -rf /tmp/game_src
+
+      # ==================== 提交所有变更 ====================
+      - name: 提交并推送
+        run: |
+          git add src/rules/domain/*.mrs src/rules/ip/*.mrs src/rules/game/*.list 2>/dev/null || true
+          git commit -m "Auto update all rule sets ($(date -u +%Y-%m-%d))" || echo "无变更，跳过提交"
           git push

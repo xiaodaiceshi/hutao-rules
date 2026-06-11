@@ -1,0 +1,11 @@
+payload:
+ - '*.google.com'
+ - '*.googleapis.com'
+ - '*.gstatic.com'
+ - '*.googleadservices.com'
+ - '*.google-analytics.com'
+ - '*.googlevideo.com'
+ - '*.youtube.com'
+ - '*.ytimg.com'
+ - '*.ggpht.com'
+ - '*.googleusercontent.com'

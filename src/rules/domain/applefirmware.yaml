@@ -1,0 +1,9 @@
+payload:
+ - '*.appldnld.apple.com'
+ - '*.mesu.apple.com'
+ - '*.gbs.apple.com'
+ - '*.appattest.apple.com'
+ - '*.ocsp.apple.com'
+ - '*.appldnld.apple.com'
+ - '*.updates-http.cdn-apple.com'
+ - '*.updates.cdn-apple.com'

@@ -1,0 +1,9 @@
+# FakeIP filter domains
+DOMAIN,localhost
+DOMAIN-SUFFIX,local
+DOMAIN-SUFFIX,lan
+DOMAIN-SUFFIX,localdomain
+DOMAIN-SUFFIX,corp
+DOMAIN-SUFFIX,home
+DOMAIN-SUFFIX,internal
+DOMAIN-SUFFIX,example.com

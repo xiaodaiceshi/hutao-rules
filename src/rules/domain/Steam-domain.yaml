@@ -1,0 +1,7 @@
+payload:
+ - '*.steamcontent.com'
+ - '*.steamcdn.com'
+ - '*.steamcommunity.com'
+ - '*.steampowered.com'
+ - '*.steamstore.com'
+ - '*.steamstatic.com'

@@ -133,203 +133,24 @@ jobs:
           mihomo convert-ruleset domain yaml /tmp/wechat.yaml src/rules/domain/WeChat.mrs
           rm -f /tmp/wechat.list /tmp/wechat.yaml
 
-      # ==================== FakeIP Filter ====================
-      - name: 编译 fakeip-filter.mrs
+      # ==================== 从内部 .yaml 源文件编译所有规则 ====================
+      - name: 从内部源文件编译 domain/.mrs
         run: |
-          echo "payload:" > /tmp/fakeip-filter.yaml
-          cat >> /tmp/fakeip-filter.yaml << 'EOF'
-           - 'localhost'
-           - '*.localhost'
-           - '127.0.0.1'
-           - '*.local'
-           - '*.example.com'
-           - '*.lan'
-           - '*.localdomain'
-           - '*.corp'
-           - '*.home'
-           - '*.internal'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/fakeip-filter.yaml src/rules/domain/fakeip-filter.mrs
-          rm -f /tmp/fakeip-filter.yaml
+          for f in src/rules/domain/*.yaml; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f" .yaml)
+            echo "📦 编译 domain/$base.mrs"
+            mihomo convert-ruleset domain yaml "$f" "src/rules/domain/$base.mrs"
+          done
 
-      # ==================== Direct / Proxy ====================
-      - name: 编译 direct.mrs / proxy.mrs
+      - name: 从内部源文件编译 IP/.mrs
         run: |
-          echo "payload:" > /tmp/direct.yaml
-          echo " - 'direct.example.com'" >> /tmp/direct.yaml
-          mihomo convert-ruleset domain yaml /tmp/direct.yaml src/rules/domain/direct.mrs
-          echo "payload:" > /tmp/proxy.yaml
-          echo " - 'proxy.example.com'" >> /tmp/proxy.yaml
-          mihomo convert-ruleset domain yaml /tmp/proxy.yaml src/rules/domain/proxy.mrs
-          rm -f /tmp/direct.yaml /tmp/proxy.yaml
-
-      # ==================== Apple TV ====================
-      - name: 编译 appletv.mrs
-        run: |
-          echo "payload:" > /tmp/appletv.yaml
-          cat >> /tmp/appletv.yaml << 'EOF'
-           - '*.tv.apple.com'
-           - '*.apple.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/appletv.yaml src/rules/domain/appletv.mrs
-          rm -f /tmp/appletv.yaml
-
-      # ==================== Apple Firmware ====================
-      - name: 编译 applefirmware.mrs
-        run: |
-          echo "payload:" > /tmp/applefirmware.yaml
-          cat >> /tmp/applefirmware.yaml << 'EOF'
-           - '*.appldnld.apple.com'
-           - '*.mesu.apple.com'
-           - '*.gbs.apple.com'
-           - '*.appattest.apple.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/applefirmware.yaml src/rules/domain/applefirmware.mrs
-          rm -f /tmp/applefirmware.yaml
-
-      # ==================== IPTV ====================
-      - name: 编译 iptv.mrs
-        run: |
-          echo "payload:" > /tmp/iptv.yaml
-          cat >> /tmp/iptv.yaml << 'EOF'
-           - '*.iptv.com'
-           - '*.tv'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/iptv.yaml src/rules/domain/iptv.mrs
-          rm -f /tmp/iptv.yaml
-
-      # ==================== NetEase Music ====================
-      - name: 编译 NetEaseMusic-domain.mrs
-        run: |
-          echo "payload:" > /tmp/NetEaseMusic-domain.yaml
-          cat >> /tmp/NetEaseMusic-domain.yaml << 'EOF'
-           - '*.music.126.net'
-           - '*.163.com'
-           - '*.netease.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/NetEaseMusic-domain.yaml src/rules/domain/NetEaseMusic-domain.mrs
-          rm -f /tmp/NetEaseMusic-domain.yaml
-
-      # ==================== Steam CDN Domain ====================
-      - name: 编译 Steam-domain.mrs
-        run: |
-          echo "payload:" > /tmp/Steam-domain.yaml
-          cat >> /tmp/Steam-domain.yaml << 'EOF'
-           - '*.steamcontent.com'
-           - '*.steamcdn.com'
-           - '*.steamcommunity.com'
-           - '*.steampowered.com'
-           - '*.steamstore.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/Steam-domain.yaml src/rules/domain/Steam-domain.mrs
-          rm -f /tmp/Steam-domain.yaml
-
-      # ==================== Steam CDN IP ====================
-      - name: 编译 steamCDN-ip.mrs
-        run: |
-          echo "payload:" > /tmp/steamCDN-ip.yaml
-          cat >> /tmp/steamCDN-ip.yaml << 'EOF'
-           - '146.66.152.0/21'
-           - '155.133.224.0/20'
-           - '208.78.164.0/22'
-          EOF
-          mihomo convert-ruleset ipcidr yaml /tmp/steamCDN-ip.yaml src/rules/ip/steamCDN-ip.mrs
-          rm -f /tmp/steamCDN-ip.yaml
-
-      # ==================== Talkatone Domain ====================
-      - name: 编译 Talkatone-domain.mrs
-        run: |
-          echo "payload:" > /tmp/Talkatone-domain.yaml
-          cat >> /tmp/Talkatone-domain.yaml << 'EOF'
-           - '*.talkatone.com'
-           - '*.tktn.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/Talkatone-domain.yaml src/rules/domain/Talkatone-domain.mrs
-          rm -f /tmp/Talkatone-domain.yaml
-
-      # ==================== Talkatone IP ====================
-      - name: 编译 Talkatone-ip.mrs
-        run: |
-          echo "payload:" > /tmp/Talkatone-ip.yaml
-          cat >> /tmp/Talkatone-ip.yaml << 'EOF'
-           - '0.0.0.0/0'
-          EOF
-          mihomo convert-ruleset ipcidr yaml /tmp/Talkatone-ip.yaml src/rules/ip/Talkatone-ip.mrs
-          rm -f /tmp/Talkatone-ip.yaml
-
-      # ==================== TVB ====================
-      - name: 编译 tvb.mrs
-        run: |
-          echo "payload:" > /tmp/tvb.yaml
-          cat >> /tmp/tvb.yaml << 'EOF'
-           - '*.tvb.com'
-           - '*.mytvsuper.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/tvb.yaml src/rules/domain/tvb.mrs
-          rm -f /tmp/tvb.yaml
-
-      # ==================== UBI ====================
-      - name: 编译 ubi.mrs
-        run: |
-          echo "payload:" > /tmp/ubi.yaml
-          cat >> /tmp/ubi.yaml << 'EOF'
-           - '*.ubi.com'
-           - '*.ubisoft.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/ubi.yaml src/rules/domain/ubi.mrs
-          rm -f /tmp/ubi.yaml
-
-      # ==================== Amazon IP ====================
-      - name: 编译 amazon-ip.mrs
-        run: |
-          echo "payload:" > /tmp/amazon-ip.yaml
-          cat >> /tmp/amazon-ip.yaml << 'EOF'
-           - '54.239.0.0/16'
-           - '52.94.0.0/15'
-          EOF
-          mihomo convert-ruleset ipcidr yaml /tmp/amazon-ip.yaml src/rules/ip/amazon-ip.mrs
-          rm -f /tmp/amazon-ip.yaml
-
-      # ==================== Google CN IP ====================
-      - name: 编译 google-cn-ip.mrs
-        run: |
-          echo "payload:" > /tmp/google-cn-ip.yaml
-          cat >> /tmp/google-cn-ip.yaml << 'EOF'
-           - '0.0.0.0/0'
-          EOF
-          mihomo convert-ruleset ipcidr yaml /tmp/google-cn-ip.yaml src/rules/ip/google-cn-ip.mrs
-          rm -f /tmp/google-cn-ip.yaml
-
-      # ==================== ASN MRS ====================
-      - name: 编译 ASN .mrs
-        run: |
-          echo "payload:" > /tmp/AS24424.yaml
-          echo " - '0.0.0.0/0'" >> /tmp/AS24424.yaml
-          mihomo convert-ruleset ipcidr yaml /tmp/AS24424.yaml src/rules/ip/AS24424.mrs
-          echo "payload:" > /tmp/AS49544.yaml
-          echo " - '0.0.0.0/0'" >> /tmp/AS49544.yaml
-          mihomo convert-ruleset ipcidr yaml /tmp/AS49544.yaml src/rules/ip/AS49544.mrs
-          echo "payload:" > /tmp/AS132203.yaml
-          echo " - '0.0.0.0/0'" >> /tmp/AS132203.yaml
-          mihomo convert-ruleset ipcidr yaml /tmp/AS132203.yaml src/rules/ip/AS132203.mrs
-          rm -f /tmp/AS24424.yaml /tmp/AS49544.yaml /tmp/AS132203.yaml
-
-      # ==================== Streaming ====================
-      - name: 编译 streaming.mrs
-        run: |
-          echo "payload:" > /tmp/streaming.yaml
-          cat >> /tmp/streaming.yaml << 'EOF'
-           - '*.netflix.com'
-           - '*.hulu.com'
-           - '*.disneyplus.com'
-           - '*.hbomax.com'
-           - '*.primevideo.com'
-           - '*.paramountplus.com'
-           - '*.peacocktv.com'
-           - '*.youtube.com'
-          EOF
-          mihomo convert-ruleset domain yaml /tmp/streaming.yaml src/rules/domain/streaming.mrs
-          rm -f /tmp/streaming.yaml
+          for f in src/rules/ip/*.yaml; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f" .yaml)
+            echo "📦 编译 ip/$base.mrs"
+            mihomo convert-ruleset ipcidr yaml "$f" "src/rules/ip/$base.mrs"
+          done
 
       # ==================== Game (from SSTap-Rule) ====================
       - name: 拉取游戏规则

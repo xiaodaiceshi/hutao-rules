@@ -1,0 +1,11 @@
+payload:
+ - '*.openai.com'
+ - '*.chatgpt.com'
+ - '*.ai.com'
+ - '*.copilot.microsoft.com'
+ - '*.deepseek.com'
+ - '*.anthropic.com'
+ - '*.claude.ai'
+ - '*.gemini.google.com'
+ - '*.perplexity.ai'
+ - '*.poe.com'

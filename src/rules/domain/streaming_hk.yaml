@@ -1,0 +1,9 @@
+payload:
+ - '*.netflix.com'
+ - '*.netflix.net'
+ - '*.hulu.com'
+ - '*.disneyplus.com'
+ - '*.hbomax.com'
+ - '*.primevideo.com'
+ - '*.paramountplus.com'
+ - '*.peacocktv.com'

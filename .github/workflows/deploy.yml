@@ -1,6 +1,9 @@
-name: 验证并部署规则集
+name: 每日验证配置
 
 on:
+  schedule:
+    # 每天北京时间 05:00 执行 (UTC 21:00)
+    - cron: '0 21 * * *'
   push:
     branches: [main]
     paths:
@@ -35,7 +38,7 @@ jobs:
       - name: 验证规则列表文件
         run: |
           echo "=== 规则文件检查 ==="
-          find src/rules -type f | sort
+          find src/rules -type f 2>/dev/null | sort || echo "(无规则文件)"
           echo ""
           echo "=== Rewrite 文件检查 ==="
-          find src/rewrite -type f | sort
+          find src/rewrite -type f 2>/dev/null | sort || echo "(无 rewrite 文件)"

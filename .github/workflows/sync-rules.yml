@@ -1,0 +1,276 @@
+name: 自动同步并编译规则集
+
+on:
+  schedule:
+    # 每天北京时间 02:00 执行 (UTC 18:00)
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # =============================================
+  # Job 1: 广告拦截规则 (banAd)
+  # =============================================
+  banad-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Fetch and compile BanAd rules
+        run: |
+          mkdir -p src/rules/domain
+          curl -sL "https://raw.githubusercontent.com/8680/GOODBYEADS/master/data/rules/qx.list" -o /tmp/qx.list
+          grep -Eo 'DOMAIN,[^,]+' /tmp/qx.list | sed 's/DOMAIN,//' > /tmp/banAd-domain.list
+          grep -Eo 'DOMAIN-SUFFIX,[^,]+' /tmp/qx.list | sed 's/DOMAIN-SUFFIX,//' >> /tmp/banAd-domain.list
+          echo "payload:" > /tmp/banAd.yaml
+          sort -u /tmp/banAd-domain.list | awk '{print " - \x27" $0 "\x27"}' >> /tmp/banAd.yaml
+          mihomo convert-ruleset domain yaml /tmp/banAd.yaml src/rules/domain/banAd.mrs
+          rm -f /tmp/qx.list /tmp/banAd-domain.list /tmp/banAd.yaml
+          echo "✅ banAd.mrs generated"
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/banAd.mrs
+          git commit -m "Auto update banAd.mrs" || true
+          git push
+
+  # =============================================
+  # Job 2: Emby 规则
+  # =============================================
+  emby-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Fetch and compile Emby rules
+        run: |
+          mkdir -p src/rules/domain
+          curl -sL "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/emby.list" -o /tmp/emby1.list 2>/dev/null || touch /tmp/emby1.list
+          curl -sL "https://raw.githubusercontent.com/666OS/YYDS/main/mihomo/rules/emby.list" -o /tmp/emby2.list
+          cat /tmp/emby1.list /tmp/emby2.list | grep -v '^#' | grep -v 'IC DR' | sort -u > /tmp/merged_emby.list
+          echo "payload:" > /tmp/emby.yaml
+          while IFS=, read -r type value; do
+            if [[ -n "$type" && -n "$value" ]]; then
+              if [[ "$type" == "DOMAIN" ]]; then
+                echo " - $value" >> /tmp/emby.yaml
+              elif [[ "$type" == "DOMAIN-SUFFIX" ]]; then
+                echo " - '*.$value'" >> /tmp/emby.yaml
+              fi
+            fi
+          done < /tmp/merged_emby.list
+          mihomo convert-ruleset domain yaml /tmp/emby.yaml src/rules/domain/emby.mrs
+          rm -f /tmp/emby1.list /tmp/emby2.list /tmp/merged_emby.list /tmp/emby.yaml
+          echo "✅ emby.mrs generated"
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/emby.mrs
+          git commit -m "Auto update emby.mrs" || true
+          git push
+
+  # =============================================
+  # Job 3: AI 规则
+  # =============================================
+  ai-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Fetch and compile AI rules
+        run: |
+          mkdir -p src/rules/domain
+          # 从 MetaCubeX 拉取 AI 域名列表
+          curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-ai-!cn.list" -o /tmp/ai.list 2>/dev/null || true
+          echo "payload:" > /tmp/ai.yaml
+          if [ -s /tmp/ai.list ]; then
+            grep -v '^#' /tmp/ai.list | while IFS=, read -r line; do
+              trimmed=$(echo "$line" | xargs)
+              if [[ -n "$trimmed" ]]; then
+                if [[ "$trimmed" == .* ]]; then
+                  echo " - '*$(echo "$trimmed" | sed "s/^\.//")'" >> /tmp/ai.yaml
+                else
+                  echo " - '$trimmed'" >> /tmp/ai.yaml
+                fi
+              fi
+            done
+          fi
+          mihomo convert-ruleset domain yaml /tmp/ai.yaml src/rules/domain/ai.mrs
+          rm -f /tmp/ai.list /tmp/ai.yaml
+          echo "✅ ai.mrs generated"
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/ai.mrs
+          git commit -m "Auto update ai.mrs" || true
+          git push
+
+  # =============================================
+  # Job 4: Google 规则
+  # =============================================
+  google-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Fetch and compile Google rules
+        run: |
+          mkdir -p src/rules/domain
+          curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/google.list" -o /tmp/google.list
+          echo "payload:" > /tmp/google.yaml
+          grep -v '^#' /tmp/google.list | while IFS=, read -r line; do
+            trimmed=$(echo "$line" | xargs)
+            if [[ -n "$trimmed" ]]; then
+              if [[ "$trimmed" == .* ]]; then
+                echo " - '*$(echo "$trimmed" | sed "s/^\.//")'" >> /tmp/google.yaml
+              else
+                echo " - '$trimmed'" >> /tmp/google.yaml
+              fi
+            fi
+          done
+          mihomo convert-ruleset domain yaml /tmp/google.yaml src/rules/domain/google.mrs
+          rm -f /tmp/google.list /tmp/google.yaml
+          echo "✅ google.mrs generated"
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/google.mrs
+          git commit -m "Auto update google.mrs" || true
+          git push
+
+  # =============================================
+  # Job 5: WeChat 规则
+  # =============================================
+  wechat-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Fetch and compile WeChat rules
+        run: |
+          mkdir -p src/rules/domain
+          curl -sL "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/wechat.list" -o /tmp/wechat.list
+          echo "payload:" > /tmp/wechat.yaml
+          grep -v '^#' /tmp/wechat.list | while IFS=, read -r line; do
+            trimmed=$(echo "$line" | xargs)
+            if [[ -n "$trimmed" ]]; then
+              echo " - '$trimmed'" >> /tmp/wechat.yaml
+            fi
+          done
+          mihomo convert-ruleset domain yaml /tmp/wechat.yaml src/rules/domain/WeChat.mrs
+          rm -f /tmp/wechat.list /tmp/wechat.yaml
+          echo "✅ WeChat.mrs generated"
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/WeChat.mrs
+          git commit -m "Auto update WeChat.mrs" || true
+          git push
+
+  # =============================================
+  # Job 6: FakeIP Filter 规则
+  # =============================================
+  fakeip-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Generate fakeip-filter rules
+        run: |
+          mkdir -p src/rules/domain
+          echo "payload:" > /tmp/fakeip-filter.yaml
+          # 常用直连域名，不返回 fake-ip
+          cat >> /tmp/fakeip-filter.yaml << 'EOF'
+           - 'localhost'
+           - '*.localhost'
+           - '127.0.0.1'
+           - '*.local'
+           - '*.example.com'
+           - '*.lan'
+           - '*.localdomain'
+           - '*.corp'
+          EOF
+          mihomo convert-ruleset domain yaml /tmp/fakeip-filter.yaml src/rules/domain/fakeip-filter.mrs
+          rm -f /tmp/fakeip-filter.yaml
+          echo "✅ fakeip-filter.mrs generated"
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/fakeip-filter.mrs
+          git commit -m "Auto update fakeip-filter.mrs" || true
+          git push
+
+  # =============================================
+  # Job 7: Direct / Proxy 规则
+  # =============================================
+  direct-proxy-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Install mihomo
+        run: |
+          version=$(curl -sL https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/version.txt)
+          curl -sL "https://github.com/MetaCubeX/mihomo/releases/download/Prerelease-Alpha/mihomo-linux-amd64-${version}.gz" | \
+          gunzip -c > /usr/local/bin/mihomo && chmod +x /usr/local/bin/mihomo
+      - name: Generate direct rules
+        run: |
+          mkdir -p src/rules/domain
+          echo "payload:" > /tmp/direct.yaml
+          echo " - 'direct.example.com'" >> /tmp/direct.yaml
+          mihomo convert-ruleset domain yaml /tmp/direct.yaml src/rules/domain/direct.mrs
+          echo "payload:" > /tmp/proxy.yaml
+          echo " - 'proxy.example.com'" >> /tmp/proxy.yaml
+          mihomo convert-ruleset domain yaml /tmp/proxy.yaml src/rules/domain/proxy.mrs
+          rm -f /tmp/direct.yaml /tmp/proxy.yaml
+      - name: Commit and push
+        run: |
+          git add src/rules/domain/direct.mrs src/rules/domain/proxy.mrs
+          git commit -m "Auto update direct.mrs and proxy.mrs" || true
+          git push

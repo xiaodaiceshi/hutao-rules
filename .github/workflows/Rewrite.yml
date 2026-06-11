@@ -1,0 +1,84 @@
+name: 每日自动更新配置文件
+
+on:
+  schedule:
+    # 每天北京时间 05:00 执行 (UTC 21:00)
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-configs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch and transform all configs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p src/rewrite
+
+          # 要处理的 URL 列表（使用 hutao-rules 仓库地址）
+          urls=(
+            "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/hutao-full.yaml"
+            "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/hutao-full-noad.yaml"
+            "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/hutao-lite.yaml"
+            "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/hutao-beta.yaml"
+          )
+
+          for url in "${urls[@]}"; do
+            tmp="$(mktemp)"
+            curl -fsSL "$url" -o "$tmp"
+
+            # 生成目标文件名（hutao-* → hutao-rewrite-*）
+            base="$(basename "$url")"
+            outname="${base/.yaml/-rewrite.yaml}"
+            outfile="src/rewrite/$outname"
+
+            # 1) 在 proxy-groups 之前把顶级 proxies: 替换为 +proxies:
+            awk 'BEGIN{before_pg=1}
+            /^[[:space:]]*proxy-groups:/ {before_pg=0}
+            {
+              if (before_pg && $0 ~ /^[[:space:]]*proxies:[[:space:]]*$/) {
+                sub(/proxies:/, "+proxies:")
+              }
+              print
+            }' "$tmp" > "${tmp}_step1"
+
+            # 2) 删除 PProviders 块（缩进无关，直到第二个分隔线）
+            awk 'BEGIN{inblock=0;delims=0}
+            {
+              if(inblock){
+                if($0 ~ /^[#[:space:]]*#/ && $0 ~ /^[#[:space:]]*$/) {next}
+                if($0 ~ /^#/ && index($0,"#")==1){next}
+                if($0 ~ /^##############################################$/){
+                  delims++
+                  if(delims==2){inblock=0; next} else {next}
+                }
+                next
+              }
+              if($0 ~ /^[[:space:]]*PProviders:/){
+                inblock=1; delims=0; next
+              }
+              print
+            }' "${tmp}_step1" > "$outfile"
+
+            rm -f "$tmp" "${tmp}_step1"
+            echo "✅ 已处理 $url -> $outfile"
+          done
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          git add src/rewrite/
+          git commit -m "Auto update configs in /src/rewrite" || echo "无变更，跳过提交"
+          git push

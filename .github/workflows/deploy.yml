@@ -1,0 +1,16 @@
+name: 部署规则集
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 验证 Yaml
+        run: |
+          # 在此添加 yaml 验证命令
+          echo "待实现"

@@ -1,0 +1,13 @@
+# Hutao 域名规则集
+
+# 直连
+DOMAIN-SUFFIX,cn,Direct
+DOMAIN-SUFFIX,baidu.com,Direct
+
+# 代理
+DOMAIN-SUFFIX,google.com,Proxy
+DOMAIN-SUFFIX,youtube.com,Proxy
+DOMAIN-SUFFIX,github.com,Proxy
+
+# 广告拦截
+DOMAIN-SUFFIX,adservice.google.com,Reject

@@ -1,0 +1,10 @@
+# Hutao 游戏规则集
+
+# 游戏加速
+DOMAIN-SUFFIX,steamcontent.com,Proxy
+DOMAIN-SUFFIX,steampowered.com,Proxy
+DOMAIN-SUFFIX,eac-cdn.com,Proxy
+DOMAIN-SUFFIX,playstation.com,Proxy
+DOMAIN-SUFFIX,xboxlive.com,Proxy
+DOMAIN-SUFFIX,nintendo.net,Proxy
+DOMAIN-SUFFIX,epicgames.com,Proxy

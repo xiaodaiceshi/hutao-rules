@@ -1,0 +1,6 @@
+# Hutao 复写规则
+# 适用于 Mihomo / Stash 客户端
+
+rules:
+  - DOMAIN-SUFFIX,example.com,Proxy
+  - DOMAIN-KEYWORD,google,Proxy

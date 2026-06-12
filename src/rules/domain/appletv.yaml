@@ -1,6 +1,0 @@
-payload:
- - '*.tv.apple.com'
- - '*.apple.com'
- - '*.appletv.com'
- - '*.tv.apple.com'
- - '*.hls-*.itunes.apple.com'

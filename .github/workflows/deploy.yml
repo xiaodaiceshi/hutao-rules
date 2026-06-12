@@ -1,4 +1,4 @@
-name: 每日验证配置
+﻿name: 每日验证配置
 
 on:
   schedule:
@@ -9,7 +9,10 @@ on:
     paths:
       - 'hutao-*.yaml'
       - 'hutao-*.ini'
-      - 'hutao-*.list'\n      - 'pcdn.list'\n      - 'src/rules/game/*.list'\n      - 'src/rules/domain/upstream/*.list'
+      - 'hutao-*.list'
+      - 'pcdn.list'
+      - 'src/rules/game/*.list'
+      - 'src/rules/domain/upstream/*.list'
       - 'src/rules/**'
       - 'src/rewrite/**'
   workflow_dispatch:

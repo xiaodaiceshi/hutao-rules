@@ -50,7 +50,7 @@ jobs:
             [[ -z "$trimmed" || "$trimmed" == "#"* ]] && continue
             echo " - '$trimmed'" >> /tmp/banAd_mini.yaml
           done
-          mihomo convert-ruleset domain yaml /tmp/banAd_mini.yaml src/rules/domain/banAd_mini.mrs
+          mihomo convert-ruleset domain yaml /tmp/banAd_mini.yaml src/rules/domain/banAd-mini-domain.mrs
           rm -f /tmp/ads.list /tmp/banAd_mini.yaml
 
       # ==================== Emby ====================

@@ -33,7 +33,8 @@ hutao-rules/
 ├── hutao-lite.yaml           ← 精简配置
 ├── hutao-beta.yaml           ← 测试配置
 ├── README.md
-├── pcdn.list\n└── LICENSE
+├── pcdn.list
+└── LICENSE
 ```
 
 ## 使用方式

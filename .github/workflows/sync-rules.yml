@@ -1,4 +1,4 @@
-﻿name: 自动同步并编译规则集
+name: 自动同步并编译规则集
 
 on:
   schedule:

@@ -1,4 +1,4 @@
-﻿# Hutao Rewrite 无广告精简版配置（由 Rewrite.yml 自动生成）
+# Hutao Rewrite 无广告精简版配置（由 Rewrite.yml 自动生成）
 # 本文件由 Rewrite.yml workflow 自动生成
 
 Proxy_first: &Proxy_first {type: select, proxies: [节点选择, 香港节点, 新加坡节点, 日本节点, 台湾节点, 美国节点, 欧洲节点, 全部节点, 自建/家宽节点, 全球直连]}

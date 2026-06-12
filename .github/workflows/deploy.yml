@@ -1,4 +1,4 @@
-﻿name: 每日验证配置
+name: 每日验证配置
 
 on:
   schedule:

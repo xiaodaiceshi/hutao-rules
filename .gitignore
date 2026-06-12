@@ -23,3 +23,6 @@ Desktop.ini
 
 # ===== Git =====
 *.orig
+ 
+ # ===== Inbox ( Codex 临时工作区) =====
+ docs/inbox/

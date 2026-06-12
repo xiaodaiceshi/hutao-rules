@@ -6,6 +6,9 @@ CLAUDE.md
 AGENTS.md
 task.md
 
+# ===== 临时传递文档（Claude→Codex 一次性指令，用完即弃） =====
+docs/inbox/
+
 # ===== 系统文件 =====
 Thumbs.db
 Desktop.ini

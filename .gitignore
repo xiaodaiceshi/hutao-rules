@@ -1,6 +1,11 @@
 # ===== 生成物 =====
 output/
 
+# ===== AI 工作区本地文件（各自侧私有，不提交远端） =====
+CLAUDE.md
+AGENTS.md
+task.md
+
 # ===== 系统文件 =====
 Thumbs.db
 Desktop.ini
@@ -8,6 +13,7 @@ Desktop.ini
 
 # ===== IDE / 编辑器 =====
 .idea/
+.vscode/
 *.swp
 *.swo
 
@@ -17,3 +23,6 @@ Desktop.ini
 
 # ===== Git =====
 *.orig
+ 
+ # ===== Inbox ( Codex 临时工作区) =====
+ docs/inbox/

@@ -313,9 +313,9 @@ rule-anchor:
 # 规则集定义
 rule-providers:
   # ---- 广告拦截 ----
-  banAd_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/banAd_mini.mrs" }
+  banAd_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/banAd-mini-domain.mrs" }
   # ---- 国产软件 ----
-  wechat_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/WeChat.mrs" }
+  wechat_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/wechat-domain.mrs" }
   alibaba_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/alibaba.mrs" }
   tencent!cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/tencent%40!cn.mrs" }
   tencent_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/tencent.mrs" }
@@ -330,16 +330,16 @@ rule-providers:
   public-tracker_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-public-tracker.mrs" }
   115_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/115.mrs" }
   aliyun_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/aliyun.mrs" }
-  iptv_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/iptv.mrs" }
+  iptv_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/iptv-domain.mrs" }
   private_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs" }
   apple_cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/apple%40cn.mrs" }
   # ---- Google ----
-  google_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/google.mrs" }
-  google_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/google.mrs" }
+  google_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/google-domain.mrs" }
+  google_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/google-domain.mrs" }
   youtube_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs" }
   fcm_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/googlefcm.mrs" }
   # ---- AI ----
-  ai_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/ai.mrs" }
+  ai_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/ai-domain.mrs" }
   ai!cn_domain: { <<: *domain, url: "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-ai-!cn.mrs" }
   # ---- Microsoft ----
   onedrive_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/onedrive.mrs" }
@@ -362,8 +362,8 @@ rule-providers:
   # ---- Signal ----
   signal_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/signal.mrs" }
   # ---- Talkatone ----
-  talkatone_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/Talkatone-domain.mrs" }
-  talkatone_ip: { <<: *ip, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/ip/Talkatone-ip.mrs" }
+  talkatone_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/talkatone-domain.mrs" }
+  talkatone_ip: { <<: *ip, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/ip/talkatone-ip.mrs" }
   # ---- Netflix ----
   netflix_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs" }
   netflix_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs" }
@@ -384,21 +384,21 @@ rule-providers:
   # ---- Bahamut ----
   bahamut_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/bahamut.mrs" }
   # ---- Emby ----
-  emby_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/emby.mrs" }
+  emby_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/emby-domain.mrs" }
   emby_ip: { <<: *ip, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/ip/emby-ip.mrs" }
   # ---- Apple ----
   apple_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple.mrs" }
-  appleTV_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/appletv.mrs" }
-  apple_firmware_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/applefirmware.mrs" }
+  appleTV_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/apple-tv-domain.mrs" }
+  apple_firmware_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/apple-firmware-domain.mrs" }
   # ---- Steam ----
   steam_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/steam.mrs" }
-  steamcdn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/Steam-domain.mrs" }
-  steamcdn_ip: { <<: *ip, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/ip/steamCDN-ip.mrs" }
+  steamcdn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/steam-domain.mrs" }
+  steamcdn_ip: { <<: *ip, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/ip/steamcdn-ip.mrs" }
   # ---- 游戏平台 ----
   Epic_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/epicgames.mrs" }
   EA_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/ea.mrs" }
   Blizzard_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/blizzard.mrs" }
-  UBI_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/ubi.mrs" }
+  UBI_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/ubi-domain.mrs" }
   Sony_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/sony.mrs" }
   Nintendo_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/nintendo.mrs" }
   # ---- PayPal ----
@@ -416,8 +416,8 @@ rule-providers:
   # ---- Cloudflare ----
   Cloudflare_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/cloudflare.mrs" }
   # ---- 通用 ----
-  proxy_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/proxy.mrs" }
-  direct_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/direct.mrs" }
+  proxy_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/proxy-domain.mrs" }
+  direct_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/direct-domain.mrs" }
   gfw_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/gfw.mrs" }
   geolocation-!cn: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs" }
   # ---- IP ----
@@ -425,10 +425,10 @@ rule-providers:
   private_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geoip/private.mrs" }
   # ---- TV ----
   twitch_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/twitch.mrs" }
-  TVB_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/tvb.mrs" }
+  TVB_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/tvb-domain.mrs" }
   porn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-porn.mrs" }
   media!cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo/geosite/category-social-media-!cn.mrs" }
   # ---- 其他 ----
-  NetEaseMusic_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/NetEaseMusic-domain.mrs" }
-  google_googlevpn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/googleVPN.mrs" }
-  fakeip_filter_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/fakeip-filter.mrs" }
+  NetEaseMusic_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/netease-music-domain.mrs" }
+  google_googlevpn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/google-vpn.mrs" }
+  fakeip_filter_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/fakeip-filter-domain.mrs" }

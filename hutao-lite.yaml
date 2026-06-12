@@ -231,7 +231,7 @@ rule-anchor:
   domain_text: &domain_text {type: http, interval: 86400, behavior: domain, format: text}
 
 rule-providers:
-  emby_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/emby.mrs" }
-  ai_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/ai.mrs" }
+  emby_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/emby-domain.mrs" }
+  ai_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/ai-domain.mrs" }
   bilibili_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/meta/geo-lite/geoip/bilibili.mrs" }
-  fakeip_filter_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/fakeip-filter.mrs" }
+  fakeip_filter_domain: { <<: *domain, url: "https://raw.githubusercontent.com/xiaodaiceshi/hutao-rules/refs/heads/main/src/rules/domain/fakeip-filter-domain.mrs" }

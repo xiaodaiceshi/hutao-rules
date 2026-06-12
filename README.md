@@ -1,4 +1,4 @@
-# Hutao Rules
+﻿# Hutao Rules
 
 适用于 Mihomo / Stash 客户端的代理规则配置。参考自 [Lanlan13-14/Rules](https://github.com/Lanlan13-14/Rules) 并适配 hutao-rules。
 
@@ -11,7 +11,7 @@
 | `hutao-lite.yaml` | 精简版（含广告拦截） | `configfull_lite.yaml` |
 | `hutao-beta.yaml` | 测试版（精简服务分组） | `configfull_beta.yaml` |
 | `hutao-custom.ini` | 自定义配置 | `custom-mini.ini` |
-| `hutao-pcdn.list` | PCDN 列表 | `pcdn.list` |
+| `pcdn.list` | PCDN 列表 | `pcdn.list` |
 
 ## 仓库结构
 
@@ -33,6 +33,7 @@ hutao-rules/
 ├── hutao-lite.yaml           ← 精简配置
 ├── hutao-beta.yaml           ← 测试配置
 ├── README.md
+├── pcdn.list
 └── LICENSE
 ```
 

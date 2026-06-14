@@ -1,4 +1,14 @@
-# Claude + Codex 协同维护规范（平衡版）
+# PROJECT-SPEC.md
+
+## 项目简介
+
+Mihomo / Stash 客户端代理规则仓库。与 Codex 双 AI 协同维护。
+
+## 项目级工作原则
+
+- 本项目为 YAML 配置仓库，修改配置前应先说明变更意图。
+- 不删除已有配置文件，除非用户明确要求。
+- 协同规范遵循平衡版协作协议。
 
 ## 设计目标
 
@@ -20,9 +30,9 @@
 
 ---
 
-# Agent 分工
+## Agent 分工
 
-## Claude（Review Agent）
+### Claude（Review Agent）
 
 职责：
 
@@ -56,7 +66,7 @@ rules/
 
 ---
 
-## Codex（Execution Agent）
+### Codex（Execution Agent）
 
 职责：
 
@@ -84,7 +94,7 @@ rules/
 
 ---
 
-# 分支模型
+## 分支模型
 
 长期保留：
 
@@ -106,7 +116,7 @@ codex/automate  Codex 工作分支
 
 ---
 
-# 同步规则
+## 同步规则
 
 唯一可信基线：
 
@@ -148,22 +158,22 @@ main
 
 ---
 
-# 文档结构
+## 文档结构
 
 ```text
 docs/
-├─ standards/
-├─ tasks/
-├─ reviews/
-├─ questions/
-└─ archive/
+├─ standards/          协同规范（已合并入本文件）
+├─ tasks/              任务文档
+├─ reviews/            Review 结论
+├─ questions/          歧义问题
+└─ archive/            归档
 ```
 
 ---
 
-# 任务流程
+## 任务流程
 
-## 阶段一：Claude 创建任务
+### 阶段一：Claude 创建任务
 
 创建：
 
@@ -185,12 +195,12 @@ docs/tasks/Pxxx.md
 提交示例：
 
 ```text
-[P003] add task specification
+[P001] add task specification
 ```
 
 ---
 
-## 阶段二：Codex 执行
+### 阶段二：Codex 执行
 
 Codex 从最新 main 同步：
 
@@ -211,7 +221,7 @@ docs/tasks/Pxxx.md
 提交示例：
 
 ```text
-[P003] implement rule updates
+[P001] implement rule updates
 ```
 
 完成后：
@@ -222,7 +232,7 @@ codex/automate → main
 
 ---
 
-## 阶段三：Claude Review
+### 阶段三：Claude Review
 
 Claude 同步最新 main：
 
@@ -252,7 +262,7 @@ FAIL
 
 ---
 
-## PASS 规则
+### PASS 规则
 
 PASS 必须满足：
 
@@ -278,7 +288,7 @@ docs/archive/Pxxx-review.md
 
 ---
 
-## FAIL 规则
+### FAIL 规则
 
 FAIL 必须包含：
 
@@ -310,7 +320,7 @@ Codex 继续修复
 
 ---
 
-# 歧义处理
+## 歧义处理
 
 Codex 遇到以下情况必须暂停：
 
@@ -347,31 +357,31 @@ Q005.md
 
 ---
 
-# 提交规范
+## 提交规范
 
 任务：
 
 ```text
-[P003] implement rule updates
+[P001] implement rule updates
 ```
 
 修复：
 
 ```text
-[P003] fix review issues
+[P001] fix review issues
 ```
 
 Review：
 
 ```text
-[P003] review pass
-[P003] review fail
+[P001] review pass
+[P001] review fail
 ```
 
 规范：
 
 ```text
-[P003] add task specification
+[P001] add task specification
 ```
 
 问题：
@@ -382,7 +392,7 @@ Review：
 
 ---
 
-# Review 优先原则
+## Review 优先原则
 
 Claude 的 Review 结论优先级最高。
 
@@ -404,7 +414,7 @@ Review > Task > Implementation
 
 ---
 
-# 核心原则
+## 核心原则
 
 1. Claude 负责规范和质量控制。
 2. Codex 负责执行和自动化修改。
@@ -414,3 +424,21 @@ Review > Task > Implementation
 6. Codex 遇到歧义必须暂停。
 7. 文档必须可追溯。
 8. 保持流程简单，避免不必要的临时分支。
+
+---
+
+## 工作流程
+
+1. **Claude 审查**：在 `claude/review` 分支制定规范、拆解任务、编写 `docs/tasks/Pxxx.md`
+2. **Codex 执行**：在 `codex/automate` 分支读取任务文档，批量修改 YAML 配置
+3. **Claude Review**：审查执行结果，输出 PASS/FAIL
+4. **合并到 main**：PASS 后合并 `claude/review → main` 和 `codex/automate → main`
+
+## 复盘沉淀
+
+每次任务完成后：
+
+1. 检查是否出现：明显错误 / 用户纠正 / 修改范围超出预期 / 任务质量较高 / 可复用提示词 / 值得长期保留的规则
+2. 将经验教训写入 `PROJECT_LESSONS.md`（错误 / 优点 / 提示词 / 规则分类）
+3. 将**仅适用于本项目**的规则提炼到本项目 `PROJECT-SPEC.md`
+4. 将**跨项目通用**的规则提炼到框架级 `CLAUDE.md`
